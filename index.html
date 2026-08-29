@@ -127,6 +127,35 @@
     .card-price { font-size: 12px; color: var(--text-2); }
     .card-notes { font-size: 12px; color: var(--text-3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    .card-qty {
+      font-size: 12px; font-weight: 600; padding: 2px 7px; border-radius: 8px;
+      background: var(--bg); color: var(--text-2);
+    }
+
+    .qty-stepper {
+      display: flex; align-items: center;
+      border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden;
+      background: var(--card); width: 130px;
+      transition: border-color 0.2s;
+    }
+    .qty-stepper:focus-within { border-color: var(--primary); }
+    .qty-btn {
+      width: 44px; height: 46px; border: none; background: transparent;
+      font-size: 22px; font-weight: 300; color: var(--primary); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .qty-btn:active { background: var(--primary-bg); }
+    .qty-input {
+      flex: 1; border: none; background: transparent;
+      text-align: center; font-size: 17px; font-weight: 700; color: var(--text);
+      outline: none; -webkit-appearance: none; width: 0;
+    }
+
+    .btn-green {
+      width: 100%; padding: 15px; background: var(--primary); color: white;
+      border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;
+    }
+
     .days-pill {
       font-size: 12px; font-weight: 700;
       padding: 5px 9px; border-radius: 10px;
@@ -322,6 +351,15 @@
       </div>
 
       <div class="fg">
+        <label class="flabel">數量</label>
+        <div class="qty-stepper">
+          <button type="button" class="qty-btn" id="qty-dec">－</button>
+          <input type="number" class="qty-input" id="f-qty" value="1" min="1" max="99">
+          <button type="button" class="qty-btn" id="qty-inc">＋</button>
+        </div>
+      </div>
+
+      <div class="fg">
         <label class="flabel">購買金額（選填）</label>
         <div class="price-row">
           <span class="currency">NT$</span>
@@ -343,11 +381,8 @@
 <!-- Delete modal -->
 <div class="overlay" id="del-overlay">
   <div class="modal-box">
-    <p>確定要刪除「<strong id="del-name"></strong>」嗎？</p>
-    <div class="modal-btns">
-      <button class="btn-red" id="del-confirm">刪除</button>
-      <button class="btn-gray" id="del-cancel">取消</button>
-    </div>
+    <p id="del-msg"></p>
+    <div class="modal-btns" id="del-btns"></div>
   </div>
 </div>
 
@@ -459,9 +494,10 @@ function renderList() {
 function card(item) {
   const n = daysLeft(item.expiryDate);
   const st = status(n);
+  const qty = item.quantity || 1;
   return `<div class="food-card ${st}" data-id="${item.id}">
     <div class="card-body">
-      <div class="card-name">${safe(item.name)}</div>
+      <div class="card-name">${safe(item.name)}${qty > 1 ? ` <span class="card-qty">×${qty}</span>` : ''}</div>
       <div class="card-meta">
         <span class="card-date">📅 ${fmtDate(item.expiryDate)}</span>
         <span class="badge ${item.category}">${catLabel(item.category)}</span>
@@ -585,6 +621,7 @@ async function runOCR(file) {
 function resetForm() {
   document.getElementById('f-name').value    = '';
   document.getElementById('f-expiry').value  = '';
+  document.getElementById('f-qty').value     = '1';
   document.getElementById('f-price').value   = '';
   document.getElementById('f-notes').value   = '';
   document.getElementById('cam-input').value = '';
@@ -599,6 +636,7 @@ function resetForm() {
 function doSave() {
   const name   = document.getElementById('f-name').value.trim();
   const expiry = document.getElementById('f-expiry').value;
+  const qty    = Math.max(1, parseInt(document.getElementById('f-qty').value) || 1);
   const price  = document.getElementById('f-price').value;
   const notes  = document.getElementById('f-notes').value.trim();
 
@@ -609,6 +647,7 @@ function doSave() {
     id: Date.now().toString(),
     name, expiryDate: expiry,
     category: cat,
+    quantity: qty,
     price:  price  ? Number(price)  : null,
     notes:  notes  || null,
     addedMonth: thisMonth()
@@ -714,6 +753,18 @@ function setup() {
     });
   });
 
+  // Quantity stepper
+  document.getElementById('qty-dec').addEventListener('click', () => {
+    const inp = document.getElementById('f-qty');
+    const v = parseInt(inp.value) || 1;
+    if (v > 1) inp.value = v - 1;
+  });
+  document.getElementById('qty-inc').addEventListener('click', () => {
+    const inp = document.getElementById('f-qty');
+    const v = parseInt(inp.value) || 1;
+    if (v < 99) inp.value = v + 1;
+  });
+
   // Camera
   document.getElementById('cam-input').addEventListener('change', async e => {
     const file = e.target.files[0];
@@ -738,23 +789,54 @@ function setup() {
     delId = btn.dataset.id;
     const item = items.find(i => i.id === delId);
     if (!item) return;
-    document.getElementById('del-name').textContent = item.name;
-    document.getElementById('del-overlay').classList.add('open');
-  });
+    const qty = item.quantity || 1;
+    const msg = document.getElementById('del-msg');
+    const btns = document.getElementById('del-btns');
 
-  document.getElementById('del-confirm').addEventListener('click', () => {
-    if (delId) {
-      items = items.filter(i => i.id !== delId);
-      persist(items);
-      renderList();
-      delId = null;
+    if (qty > 1) {
+      msg.innerHTML = `「<strong>${safe(item.name)}</strong>」目前剩 <strong>${qty} 份</strong>，要怎麼處理？`;
+      btns.innerHTML = `
+        <button class="btn-green" id="del-one">✅ 用掉一份（剩 ${qty - 1} 份）</button>
+        <button class="btn-red"  id="del-all">🗑 全部刪除</button>
+        <button class="btn-gray" id="del-cancel">取消</button>`;
+    } else {
+      msg.innerHTML = `確定要刪除「<strong>${safe(item.name)}</strong>」嗎？`;
+      btns.innerHTML = `
+        <button class="btn-red"  id="del-all">刪除</button>
+        <button class="btn-gray" id="del-cancel">取消</button>`;
     }
-    document.getElementById('del-overlay').classList.remove('open');
-  });
 
-  document.getElementById('del-cancel').addEventListener('click', () => {
-    delId = null;
-    document.getElementById('del-overlay').classList.remove('open');
+    document.getElementById('del-overlay').classList.add('open');
+
+    const closeModal = () => {
+      delId = null;
+      document.getElementById('del-overlay').classList.remove('open');
+    };
+
+    const oneBtn = document.getElementById('del-one');
+    if (oneBtn) {
+      oneBtn.addEventListener('click', () => {
+        const idx = items.findIndex(i => i.id === delId);
+        if (idx !== -1) {
+          items[idx].quantity = (items[idx].quantity || 1) - 1;
+          if (items[idx].quantity <= 0) items.splice(idx, 1);
+          persist(items);
+          renderList();
+        }
+        closeModal();
+      });
+    }
+
+    document.getElementById('del-all').addEventListener('click', () => {
+      if (delId) {
+        items = items.filter(i => i.id !== delId);
+        persist(items);
+        renderList();
+      }
+      closeModal();
+    });
+
+    document.getElementById('del-cancel').addEventListener('click', closeModal);
   });
 
   // Close modal on backdrop tap
