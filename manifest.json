@@ -1,7 +1,7 @@
 {
-  "name": "食品保存期限管理",
-  "short_name": "食品管理",
-  "description": "追蹤食品保存期限，快過期時自動提醒",
+  "name": "家居管理",
+  "short_name": "家居管理",
+  "description": "食品保存期限追蹤 + 雜貨庫存管理 + 購物清單 + 消費統計",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
