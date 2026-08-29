@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="食品管理">
+  <title>食品管理</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --primary: #16a34a;
+      --primary-light: #22c55e;
+      --primary-bg: #f0fdf4;
+      --warning: #f97316;
+      --warning-bg: #fff7ed;
+      --danger: #ef4444;
+      --danger-bg: #fef2f2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --border: #e2e8f0;
+      --radius: 16px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      font-size: 16px; color: var(--text);
+    }
+
+    #app { position: fixed; inset: 0; overflow: hidden; }
+
+    /* ── Views ── */
+    .view {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg);
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .view.active   { transform: translateX(0); }
+    .view.push-out { transform: translateX(-28%); }
+
+    /* ── Header ── */
+    .header {
+      background: var(--card);
+      padding: 16px 20px 14px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+
+    .tabs { display: flex; gap: 8px; }
+    .tab {
+      flex: 1; padding: 9px 4px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-2); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab.active { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+
+    /* ── Expense bar ── */
+    .expense-bar {
+      background: var(--primary); color: white;
+      text-align: center; padding: 9px 20px;
+      font-size: 14px; font-weight: 600; flex-shrink: 0;
+    }
+
+    /* ── List ── */
+    .food-list {
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 14px 16px;
+      padding-bottom: calc(90px + env(safe-area-inset-bottom));
+    }
+
+    .empty-state {
+      text-align: center; padding: 70px 20px;
+      color: var(--text-3);
+    }
+    .empty-state .big { font-size: 52px; margin-bottom: 14px; }
+    .empty-state p { font-size: 16px; line-height: 1.7; }
+    .empty-state strong { color: var(--primary); }
+
+    .cat-group { margin-bottom: 20px; }
+    .cat-group-title {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.6px;
+      color: var(--text-3); text-transform: uppercase;
+      margin-bottom: 8px; padding: 0 4px;
+    }
+
+    /* ── Card ── */
+    .food-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 14px 14px 14px 16px;
+      margin-bottom: 9px;
+      display: flex; align-items: center; gap: 10px;
+      border-left: 4px solid var(--border);
+    }
+    .food-card.expired  { border-left-color: var(--danger);  background: var(--danger-bg); }
+    .food-card.warning  { border-left-color: var(--warning); background: var(--warning-bg); }
+    .food-card.safe     { border-left-color: var(--primary-light); background: var(--primary-bg); }
+
+    .card-body { flex: 1; min-width: 0; }
+    .card-name { font-size: 16px; font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+
+    .card-date { font-size: 13px; color: var(--text-2); }
+
+    .badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    }
+    .badge.refrigerated { background: #dbeafe; color: #1d4ed8; }
+    .badge.frozen       { background: #cffafe; color: #0e7490; }
+    .badge.ambient      { background: #fef9c3; color: #854d0e; }
+
+    .card-price { font-size: 12px; color: var(--text-2); }
+    .card-notes { font-size: 12px; color: var(--text-3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .days-pill {
+      font-size: 12px; font-weight: 700;
+      padding: 5px 9px; border-radius: 10px;
+      text-align: center; white-space: nowrap; flex-shrink: 0; line-height: 1.4;
+    }
+    .days-pill.expired { background: var(--danger);  color: white; }
+    .days-pill.warning { background: var(--warning); color: white; }
+    .days-pill.safe    { background: var(--primary-light); color: white; }
+
+    .del-btn {
+      width: 34px; height: 34px; border: none; border-radius: 50%;
+      background: var(--bg); color: var(--text-3);
+      font-size: 16px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .del-btn:active { background: var(--danger-bg); color: var(--danger); }
+
+    /* ── FAB ── */
+    .fab {
+      position: fixed;
+      bottom: calc(22px + env(safe-area-inset-bottom)); right: 22px;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: var(--primary); color: white;
+      font-size: 32px; font-weight: 300; line-height: 1;
+      border: none; cursor: pointer;
+      box-shadow: 0 4px 20px rgba(22,163,74,0.45);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s; z-index: 10;
+    }
+    .fab:active { transform: scale(0.92); }
+
+    /* ── Add view ── */
+    .add-header { display: flex; align-items: center; gap: 10px; }
+    .back-btn {
+      border: none; background: transparent;
+      color: var(--primary); font-size: 16px; font-weight: 500;
+      cursor: pointer; padding: 4px 8px; border-radius: 8px; flex-shrink: 0;
+    }
+
+    .form-wrap {
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 20px 16px;
+      padding-bottom: calc(30px + env(safe-area-inset-bottom));
+    }
+
+    /* Camera zone */
+    .camera-zone { margin-bottom: 22px; }
+    .camera-lbl {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 18px;
+      background: var(--primary-bg);
+      border: 2px dashed var(--primary-light); border-radius: var(--radius);
+      color: var(--primary); font-size: 16px; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .camera-lbl:active { background: #dcfce7; }
+
+    .photo-preview {
+      width: 100%; max-height: 180px; object-fit: contain;
+      border-radius: var(--radius); margin-top: 10px; display: none;
+    }
+    .ocr-msg {
+      text-align: center; padding: 10px 14px;
+      font-size: 13px; color: var(--text-2);
+      background: var(--bg); border-radius: 10px; margin-top: 8px;
+      display: none; white-space: pre-wrap; line-height: 1.5;
+    }
+
+    /* Form fields */
+    .fg { margin-bottom: 18px; }
+    .flabel {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text-2); margin-bottom: 6px;
+    }
+    .req { color: var(--danger); }
+
+    .finput {
+      width: 100%; padding: 13px 14px;
+      border: 1.5px solid var(--border); border-radius: 12px;
+      font-size: 16px; color: var(--text); background: var(--card);
+      outline: none; transition: border-color 0.2s; -webkit-appearance: none;
+    }
+    .finput:focus { border-color: var(--primary); }
+
+    .cat-row { display: flex; gap: 8px; }
+    .cat-btn {
+      flex: 1; padding: 11px 4px;
+      border: 1.5px solid var(--border); border-radius: 12px;
+      background: transparent; color: var(--text-2);
+      font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    }
+    .cat-btn.active { border-color: var(--primary); background: var(--primary-bg); color: var(--primary); }
+
+    .price-row {
+      display: flex; align-items: center;
+      border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden;
+      background: var(--card); transition: border-color 0.2s;
+    }
+    .price-row:focus-within { border-color: var(--primary); }
+    .currency {
+      padding: 13px 12px; font-size: 15px; font-weight: 600;
+      color: var(--text-2); background: var(--bg); border-right: 1.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .price-input { border: none; border-radius: 0; flex: 1; }
+    .price-input:focus { border-color: transparent; }
+
+    .save-btn {
+      width: 100%; padding: 16px;
+      background: var(--primary); color: white; border: none;
+      border-radius: var(--radius); font-size: 17px; font-weight: 700;
+      cursor: pointer; margin-top: 6px; transition: opacity 0.2s;
+    }
+    .save-btn:active { opacity: 0.85; }
+
+    /* ── Modal ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      display: none; align-items: flex-end; justify-content: center; z-index: 200;
+    }
+    .overlay.open { display: flex; }
+    .modal-box {
+      background: var(--card);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      width: 100%; max-width: 500px;
+    }
+    .modal-box p { font-size: 17px; text-align: center; margin-bottom: 20px; }
+    .modal-btns { display: flex; flex-direction: column; gap: 10px; }
+    .btn-red {
+      width: 100%; padding: 15px; background: var(--danger); color: white;
+      border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;
+    }
+    .btn-gray {
+      width: 100%; padding: 15px; background: var(--bg); color: var(--text);
+      border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ List View ══ -->
+  <div id="list-view" class="view active">
+    <div class="header">
+      <h1>🥬 食品管理</h1>
+      <div class="tabs">
+        <button class="tab active" id="tab-date">📅 依到期日</button>
+        <button class="tab" id="tab-cat">🗂 依類別</button>
+      </div>
+    </div>
+    <div class="expense-bar" id="expense-bar" style="display:none"></div>
+    <div class="food-list" id="food-list"></div>
+    <button class="fab" id="fab">+</button>
+  </div>
+
+  <!-- ══ Add View ══ -->
+  <div id="add-view" class="view">
+    <div class="header">
+      <div class="add-header">
+        <button class="back-btn" id="back-btn">← 返回</button>
+        <h1>新增食品</h1>
+      </div>
+    </div>
+    <div class="form-wrap">
+
+      <!-- Camera -->
+      <div class="camera-zone">
+        <input type="file" id="cam-input" accept="image/*" capture="environment" style="display:none">
+        <label for="cam-input" class="camera-lbl" id="cam-lbl">📷 拍照辨識保存期限</label>
+        <img class="photo-preview" id="photo-prev">
+        <div class="ocr-msg" id="ocr-msg"></div>
+      </div>
+
+      <div class="fg">
+        <label class="flabel">品名 <span class="req">*</span></label>
+        <input type="text" class="finput" id="f-name" placeholder="例：雞蛋、牛奶、花椰菜">
+      </div>
+
+      <div class="fg">
+        <label class="flabel">保存期限 <span class="req">*</span></label>
+        <input type="date" class="finput" id="f-expiry">
+      </div>
+
+      <div class="fg">
+        <label class="flabel">類別</label>
+        <div class="cat-row">
+          <button class="cat-btn active" data-cat="refrigerated">❄️ 冷藏</button>
+          <button class="cat-btn" data-cat="frozen">🧊 冷凍</button>
+          <button class="cat-btn" data-cat="ambient">🌡️ 常溫</button>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="flabel">購買金額（選填）</label>
+        <div class="price-row">
+          <span class="currency">NT$</span>
+          <input type="number" class="finput price-input" id="f-price" placeholder="0" min="0">
+        </div>
+      </div>
+
+      <div class="fg">
+        <label class="flabel">備註（選填）</label>
+        <input type="text" class="finput" id="f-notes" placeholder="例：小烏龜飼料、兒子的零食">
+      </div>
+
+      <button class="save-btn" id="save-btn">💾 儲存</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Delete modal -->
+<div class="overlay" id="del-overlay">
+  <div class="modal-box">
+    <p>確定要刪除「<strong id="del-name"></strong>」嗎？</p>
+    <div class="modal-btns">
+      <button class="btn-red" id="del-confirm">刪除</button>
+      <button class="btn-gray" id="del-cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const KEY = 'food-tracker-items';
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; }
+}
+
+function persist(arr) {
+  localStorage.setItem(KEY, JSON.stringify(arr));
+}
+
+let items = load();
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let tab      = 'date';       // 'date' | 'cat'
+let cat      = 'refrigerated';
+let delId    = null;
+
+// ══════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════
+function daysLeft(dateStr) {
+  const exp = new Date(dateStr); exp.setHours(23, 59, 59, 999);
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  return Math.ceil((exp - now) / 86400000);
+}
+
+function fmtDate(s) {
+  const [y, m, d] = s.split('-'); return `${y}/${m}/${d}`;
+}
+
+function daysLabel(n) {
+  if (n < 0)  return `已過期${Math.abs(n)}天`;
+  if (n === 0) return '今天到期';
+  if (n === 1) return '明天到期';
+  return `剩 ${n} 天`;
+}
+
+function status(n) {
+  if (n < 0)  return 'expired';
+  if (n <= 7) return 'warning';
+  return 'safe';
+}
+
+function catLabel(c) {
+  return { refrigerated: '❄️ 冷藏', frozen: '🧊 冷凍', ambient: '🌡️ 常溫' }[c] || c;
+}
+
+function thisMonth() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function safe(s) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
+// ══════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════
+function renderList() {
+  const el = document.getElementById('food-list');
+
+  if (items.length === 0) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="big">🥬</div>
+        <p>還沒有食品紀錄<br>點右下角的 <strong>+</strong> 新增第一筆！</p>
+      </div>`;
+    renderExpBar();
+    return;
+  }
+
+  if (tab === 'date') {
+    const sorted = [...items].sort((a,b) => a.expiryDate.localeCompare(b.expiryDate));
+    el.innerHTML = sorted.map(card).join('');
+  } else {
+    const groups = [
+      { key: 'refrigerated', label: '❄️ 冷藏' },
+      { key: 'frozen',       label: '🧊 冷凍' },
+      { key: 'ambient',      label: '🌡️ 常溫' },
+    ];
+    el.innerHTML = groups.map(g => {
+      const list = items
+        .filter(i => i.category === g.key)
+        .sort((a,b) => a.expiryDate.localeCompare(b.expiryDate));
+      if (!list.length) return '';
+      return `<div class="cat-group">
+        <div class="cat-group-title">${g.label}（${list.length}）</div>
+        ${list.map(card).join('')}
+      </div>`;
+    }).join('');
+  }
+
+  renderExpBar();
+}
+
+function card(item) {
+  const n = daysLeft(item.expiryDate);
+  const st = status(n);
+  return `<div class="food-card ${st}" data-id="${item.id}">
+    <div class="card-body">
+      <div class="card-name">${safe(item.name)}</div>
+      <div class="card-meta">
+        <span class="card-date">📅 ${fmtDate(item.expiryDate)}</span>
+        <span class="badge ${item.category}">${catLabel(item.category)}</span>
+        ${item.price ? `<span class="card-price">💰 NT$${Number(item.price).toLocaleString()}</span>` : ''}
+      </div>
+      ${item.notes ? `<div class="card-notes">📝 ${safe(item.notes)}</div>` : ''}
+    </div>
+    <div class="days-pill ${st}">${daysLabel(n)}</div>
+    <button class="del-btn" data-id="${item.id}" aria-label="刪除">✕</button>
+  </div>`;
+}
+
+function renderExpBar() {
+  const bar = document.getElementById('expense-bar');
+  const m   = thisMonth();
+  const total = items
+    .filter(i => i.addedMonth === m && i.price)
+    .reduce((s, i) => s + Number(i.price), 0);
+  if (total > 0) {
+    bar.textContent = `💰 本月食物花費：NT$ ${total.toLocaleString()}`;
+    bar.style.display = 'block';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════════
+//  VIEWS
+// ══════════════════════════════════════
+function goAdd() {
+  document.getElementById('list-view').classList.add('push-out');
+  document.getElementById('add-view').classList.add('active');
+}
+
+function goList() {
+  document.getElementById('add-view').classList.remove('active');
+  document.getElementById('list-view').classList.remove('push-out');
+  resetForm();
+}
+
+// ══════════════════════════════════════
+//  OCR
+// ══════════════════════════════════════
+function parseDate(text) {
+  const patterns = [
+    // YYYY/MM/DD or YYYY-MM-DD or YYYY.MM.DD
+    { re: /(\d{4})[.\/\-](\d{1,2})[.\/\-](\d{1,2})/, fn: m => `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}` },
+    // Chinese YYYY年MM月DD日
+    { re: /(\d{4})年(\d{1,2})月(\d{1,2})日/, fn: m => `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}` },
+    // Chinese YYYY年MM月
+    { re: /(\d{4})年(\d{1,2})月/, fn: m => `${m[1]}-${m[2].padStart(2,'0')}-01` },
+    // DD/MM/YYYY or MM/DD/YYYY (year at end)
+    { re: /(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})/, fn: m => {
+        // Try to guess: if first num > 12, it's day first (DD/MM/YYYY)
+        const a = parseInt(m[1]), b = parseInt(m[2]);
+        if (a > 12) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+        return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+    }},
+    // MM/YYYY
+    { re: /(\d{1,2})[.\/](\d{4})/, fn: m => `${m[2]}-${m[1].padStart(2,'0')}-01` },
+  ];
+
+  for (const { re, fn } of patterns) {
+    const m = text.match(re);
+    if (m) {
+      try {
+        const date = fn(m);
+        // Validate
+        const [y, mo, d] = date.split('-').map(Number);
+        if (y < 2024 || y > 2035 || mo < 1 || mo > 12 || d < 1 || d > 31) continue;
+        return date;
+      } catch {}
+    }
+  }
+  return null;
+}
+
+async function runOCR(file) {
+  const msg = document.getElementById('ocr-msg');
+  msg.style.display = 'block';
+  msg.style.color = '';
+
+  try {
+    msg.textContent = '⚡ 載入辨識引擎中…（首次使用需下載語言包，請稍候）';
+
+    const worker = await Tesseract.createWorker('eng', 1, {
+      logger: m => {
+        if (m.status === 'loading tesseract core')    msg.textContent = '📥 載入辨識引擎中…';
+        else if (m.status === 'loading language traineddata') msg.textContent = '📦 載入語言包中…';
+        else if (m.status === 'initializing tesseract') msg.textContent = '⚙️ 初始化中…';
+        else if (m.status === 'recognizing text') {
+          const pct = Math.round((m.progress || 0) * 100);
+          msg.textContent = `🔍 辨識中… ${pct}%`;
+        }
+      }
+    });
+
+    const { data: { text } } = await worker.recognize(file);
+    await worker.terminate();
+
+    const date = parseDate(text);
+
+    if (date) {
+      document.getElementById('f-expiry').value = date;
+      msg.textContent = `✅ 辨識完成！日期：${fmtDate(date)}\n請確認是否正確，若不對請手動修改`;
+      msg.style.color = '#16a34a';
+    } else {
+      msg.textContent = `⚠️ 未能自動辨識到日期，請手動輸入\n（若照片模糊或角度傾斜，可重拍試試）`;
+      msg.style.color = '#f97316';
+    }
+
+  } catch (e) {
+    msg.textContent = '❌ 辨識失敗，請手動輸入日期';
+    msg.style.color = '#ef4444';
+  }
+}
+
+// ══════════════════════════════════════
+//  FORM
+// ══════════════════════════════════════
+function resetForm() {
+  document.getElementById('f-name').value    = '';
+  document.getElementById('f-expiry').value  = '';
+  document.getElementById('f-price').value   = '';
+  document.getElementById('f-notes').value   = '';
+  document.getElementById('cam-input').value = '';
+  document.getElementById('photo-prev').style.display = 'none';
+  document.getElementById('ocr-msg').style.display = 'none';
+  document.getElementById('ocr-msg').style.color = '';
+  document.getElementById('cam-lbl').textContent = '📷 拍照辨識保存期限';
+  cat = 'refrigerated';
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === 'refrigerated'));
+}
+
+function doSave() {
+  const name   = document.getElementById('f-name').value.trim();
+  const expiry = document.getElementById('f-expiry').value;
+  const price  = document.getElementById('f-price').value;
+  const notes  = document.getElementById('f-notes').value.trim();
+
+  if (!name)   { alert('請輸入品名！');    document.getElementById('f-name').focus();   return; }
+  if (!expiry) { alert('請輸入保存期限！'); document.getElementById('f-expiry').focus(); return; }
+
+  items.push({
+    id: Date.now().toString(),
+    name, expiryDate: expiry,
+    category: cat,
+    price:  price  ? Number(price)  : null,
+    notes:  notes  || null,
+    addedMonth: thisMonth()
+  });
+  persist(items);
+  goList();
+  renderList();
+}
+
+// ══════════════════════════════════════
+//  NOTIFICATIONS
+// ══════════════════════════════════════
+async function checkNotifs() {
+  if (!('Notification' in window)) return;
+  try {
+    if (Notification.permission === 'default') await Notification.requestPermission();
+    if (Notification.permission !== 'granted') return;
+
+    const expired  = items.filter(i => daysLeft(i.expiryDate) <  0);
+    const expiring = items.filter(i => { const d = daysLeft(i.expiryDate); return d >= 0 && d <= 7; });
+
+    if (expired.length) {
+      new Notification('⚠️ 食品已過期！', {
+        body: `${expired.map(i=>i.name).join('、')} 請盡快處理`,
+        tag: 'expired'
+      });
+    } else if (expiring.length) {
+      new Notification('🔔 食品即將到期', {
+        body: `${expiring.map(i=>i.name).join('、')} 將在 7 天內到期`,
+        tag: 'expiring'
+      });
+    }
+  } catch {}
+}
+
+// ══════════════════════════════════════
+//  APPLE TOUCH ICON (for iOS home screen)
+// ══════════════════════════════════════
+function addAppleIcon() {
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 180;
+    const ctx = c.getContext('2d');
+    // Rounded green background
+    ctx.fillStyle = '#16a34a';
+    ctx.beginPath();
+    ctx.moveTo(36, 0); ctx.lineTo(144, 0);
+    ctx.quadraticCurveTo(180, 0, 180, 36);
+    ctx.lineTo(180, 144);
+    ctx.quadraticCurveTo(180, 180, 144, 180);
+    ctx.lineTo(36, 180);
+    ctx.quadraticCurveTo(0, 180, 0, 144);
+    ctx.lineTo(0, 36);
+    ctx.quadraticCurveTo(0, 0, 36, 0);
+    ctx.closePath(); ctx.fill();
+    // Emoji
+    ctx.font = '110px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('🥬', 90, 96);
+    const link = document.createElement('link');
+    link.rel = 'apple-touch-icon'; link.href = c.toDataURL('image/png');
+    document.head.appendChild(link);
+  } catch {}
+}
+
+// ══════════════════════════════════════
+//  PWA
+// ══════════════════════════════════════
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+}
+
+// ══════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════
+function setup() {
+  // Tabs
+  document.getElementById('tab-date').addEventListener('click', () => {
+    tab = 'date';
+    document.getElementById('tab-date').classList.add('active');
+    document.getElementById('tab-cat').classList.remove('active');
+    renderList();
+  });
+  document.getElementById('tab-cat').addEventListener('click', () => {
+    tab = 'cat';
+    document.getElementById('tab-cat').classList.add('active');
+    document.getElementById('tab-date').classList.remove('active');
+    renderList();
+  });
+
+  // FAB / back
+  document.getElementById('fab').addEventListener('click', goAdd);
+  document.getElementById('back-btn').addEventListener('click', goList);
+
+  // Category buttons
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      cat = b.dataset.cat;
+      document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    });
+  });
+
+  // Camera
+  document.getElementById('cam-input').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const p = document.getElementById('photo-prev');
+      p.src = ev.target.result; p.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('cam-lbl').textContent = '📷 重新拍照';
+    await runOCR(file);
+  });
+
+  // Save
+  document.getElementById('save-btn').addEventListener('click', doSave);
+
+  // Delete delegation
+  document.getElementById('food-list').addEventListener('click', e => {
+    const btn = e.target.closest('.del-btn');
+    if (!btn) return;
+    delId = btn.dataset.id;
+    const item = items.find(i => i.id === delId);
+    if (!item) return;
+    document.getElementById('del-name').textContent = item.name;
+    document.getElementById('del-overlay').classList.add('open');
+  });
+
+  document.getElementById('del-confirm').addEventListener('click', () => {
+    if (delId) {
+      items = items.filter(i => i.id !== delId);
+      persist(items);
+      renderList();
+      delId = null;
+    }
+    document.getElementById('del-overlay').classList.remove('open');
+  });
+
+  document.getElementById('del-cancel').addEventListener('click', () => {
+    delId = null;
+    document.getElementById('del-overlay').classList.remove('open');
+  });
+
+  // Close modal on backdrop tap
+  document.getElementById('del-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('del-overlay')) {
+      delId = null;
+      document.getElementById('del-overlay').classList.remove('open');
+    }
+  });
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+(function init() {
+  setup();
+  renderList();
+  registerSW();
+  addAppleIcon();
+  setTimeout(checkNotifs, 1800);
+})();
+</script>
+</body>
+</html>
