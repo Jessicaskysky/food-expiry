@@ -111,7 +111,7 @@
     .food-card.warning  { border-left-color: var(--warning); background: var(--warning-bg); }
     .food-card.safe     { border-left-color: var(--primary-light); background: var(--primary-bg); }
 
-    .card-body { flex: 1; min-width: 0; }
+    .card-body { flex: 1; min-width: 0; cursor: pointer; }
     .card-name { font-size: 16px; font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 
@@ -409,6 +409,7 @@ let items = load();
 let tab      = 'date';       // 'date' | 'cat'
 let cat      = 'refrigerated';
 let delId    = null;
+let editId   = null;
 
 // ══════════════════════════════════════
 //  UTILS
@@ -532,6 +533,24 @@ function goAdd() {
   document.getElementById('add-view').classList.add('active');
 }
 
+function goEdit(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  editId = id;
+  document.getElementById('f-name').value   = item.name;
+  document.getElementById('f-expiry').value = item.expiryDate;
+  document.getElementById('f-qty').value    = item.quantity || 1;
+  document.getElementById('f-price').value  = item.price || '';
+  document.getElementById('f-notes').value  = item.notes || '';
+  cat = item.category;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  document.querySelector('.camera-zone').style.display = 'none';
+  document.querySelector('#add-view h1').textContent = '編輯食品';
+  document.getElementById('save-btn').textContent = '💾 儲存修改';
+  document.getElementById('list-view').classList.add('push-out');
+  document.getElementById('add-view').classList.add('active');
+}
+
 function goList() {
   document.getElementById('add-view').classList.remove('active');
   document.getElementById('list-view').classList.remove('push-out');
@@ -619,6 +638,7 @@ async function runOCR(file) {
 //  FORM
 // ══════════════════════════════════════
 function resetForm() {
+  editId = null;
   document.getElementById('f-name').value    = '';
   document.getElementById('f-expiry').value  = '';
   document.getElementById('f-qty').value     = '1';
@@ -629,6 +649,9 @@ function resetForm() {
   document.getElementById('ocr-msg').style.display = 'none';
   document.getElementById('ocr-msg').style.color = '';
   document.getElementById('cam-lbl').textContent = '📷 拍照辨識保存期限';
+  document.querySelector('.camera-zone').style.display = '';
+  document.querySelector('#add-view h1').textContent = '新增食品';
+  document.getElementById('save-btn').textContent = '💾 儲存';
   cat = 'refrigerated';
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === 'refrigerated'));
 }
@@ -643,15 +666,27 @@ function doSave() {
   if (!name)   { alert('請輸入品名！');    document.getElementById('f-name').focus();   return; }
   if (!expiry) { alert('請輸入保存期限！'); document.getElementById('f-expiry').focus(); return; }
 
-  items.push({
-    id: Date.now().toString(),
-    name, expiryDate: expiry,
-    category: cat,
-    quantity: qty,
-    price:  price  ? Number(price)  : null,
-    notes:  notes  || null,
-    addedMonth: thisMonth()
-  });
+  if (editId) {
+    const idx = items.findIndex(i => i.id === editId);
+    if (idx !== -1) {
+      items[idx] = {
+        ...items[idx],
+        name, expiryDate: expiry,
+        category: cat, quantity: qty,
+        price: price ? Number(price) : null,
+        notes: notes || null
+      };
+    }
+  } else {
+    items.push({
+      id: Date.now().toString(),
+      name, expiryDate: expiry,
+      category: cat, quantity: qty,
+      price:  price  ? Number(price)  : null,
+      notes:  notes  || null,
+      addedMonth: thisMonth()
+    });
+  }
   persist(items);
   goList();
   renderList();
@@ -782,10 +817,17 @@ function setup() {
   // Save
   document.getElementById('save-btn').addEventListener('click', doSave);
 
-  // Delete delegation
+  // Card tap → edit; del-btn → delete
   document.getElementById('food-list').addEventListener('click', e => {
     const btn = e.target.closest('.del-btn');
-    if (!btn) return;
+    if (!btn) {
+      const cardBody = e.target.closest('.card-body');
+      if (cardBody) {
+        const foodCard = cardBody.closest('.food-card');
+        if (foodCard) goEdit(foodCard.dataset.id);
+      }
+      return;
+    }
     delId = btn.dataset.id;
     const item = items.find(i => i.id === delId);
     if (!item) return;
