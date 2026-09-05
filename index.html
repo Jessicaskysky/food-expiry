@@ -86,6 +86,12 @@
     .badge.pet{background:#dcfce7;color:#166534}
     .badge.books{background:#ede9fe;color:#5b21b6}
     .badge.other{background:#f1f5f9;color:#475569}
+    .badge.dry{background:#ffedd5;color:#c2410c}
+    .badge.wet{background:#dbeafe;color:#1d4ed8}
+    .badge.treat{background:#ede9fe;color:#5b21b6}
+    .badge.litter{background:#e7e5e4;color:#57534e}
+    .badge.grooming{background:#fce7f3;color:#9d174d}
+    .badge.toy{background:#dcfce7;color:#166534}
 
     .days-pill,.stock-pill{font-size:12px;font-weight:700;padding:5px 9px;border-radius:10px;text-align:center;white-space:nowrap;flex-shrink:0;line-height:1.4}
     .days-pill.expired{background:var(--danger);color:white}
@@ -242,9 +248,9 @@
     </div>
     <div class="form-wrap">
       <div id="food-cam-zone">
-        <input type="file" id="food-cam-in" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="food-cam-in" accept="image/*" style="display:none">
         <label for="food-cam-in" class="cam-lbl" id="food-cam-lbl">📷 拍照辨識保存期限</label>
-        <input type="file" id="food-rcpt-in" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="food-rcpt-in" accept="image/*" style="display:none">
         <label for="food-rcpt-in" class="rcpt-lbl">🧾 拍收據批次新增</label>
         <img class="photo-prev" id="food-photo">
         <div class="ocr-msg" id="food-ocr"></div>
@@ -295,7 +301,7 @@
     </div>
     <div class="form-wrap">
       <div id="grocery-cam-zone" style="margin-bottom:22px">
-        <input type="file" id="grocery-rcpt-in" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="grocery-rcpt-in" accept="image/*" style="display:none">
         <label for="grocery-rcpt-in" class="rcpt-lbl">🧾 拍收據批次新增</label>
         <div class="ocr-msg" id="grocery-ocr"></div>
       </div>
@@ -343,6 +349,123 @@
         <input type="text" class="finput" id="g-notes" placeholder="例：無印款式、特價囤貨">
       </div>
       <button class="save-btn" id="grocery-save">💾 儲存</button>
+    </div>
+  </div>
+
+  <!-- PAGE: Cat -->
+  <div id="pg-cat" class="page">
+    <div class="hdr">
+      <h1>🐱 貓咪</h1>
+      <div class="sub-tabs">
+        <button class="stab active" id="ctab-food">🥩 糧食</button>
+        <button class="stab" id="ctab-supply">🪣 用品</button>
+      </div>
+    </div>
+    <div class="list-area" id="cat-list"></div>
+    <button class="fab" id="cat-fab">+</button>
+  </div>
+
+  <!-- SLIDE: Cat Food Form -->
+  <div id="sl-cat-food" class="slide">
+    <div class="hdr">
+      <div class="hdr-row">
+        <button class="back-btn" id="cat-food-back">← 返回</button>
+        <h1 id="cat-food-form-title">新增糧食</h1>
+      </div>
+    </div>
+    <div class="form-wrap">
+      <div class="fg">
+        <label class="flabel">品名 <span class="req">*</span></label>
+        <input type="text" class="finput" id="cf-name" placeholder="例：純肉乾糧、主食罐">
+      </div>
+      <div class="fg">
+        <label class="flabel">種類</label>
+        <div class="gcat-row">
+          <button class="gcat-btn active" data-cfcat="dry">🥩 乾糧</button>
+          <button class="gcat-btn" data-cfcat="wet">🍱 罐頭</button>
+          <button class="gcat-btn" data-cfcat="treat">🐟 零食</button>
+          <button class="gcat-btn" data-cfcat="other">📦 其他</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">數量</label>
+        <div class="qty-stepper">
+          <button type="button" class="qty-btn" id="cf-qty-d">－</button>
+          <input type="number" class="qty-input" id="cf-qty" value="1" min="1" max="99">
+          <button type="button" class="qty-btn" id="cf-qty-i">＋</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">最低庫存（低於此數量提醒補貨）</label>
+        <div class="qty-stepper">
+          <button type="button" class="qty-btn" id="cf-min-d">－</button>
+          <input type="number" class="qty-input" id="cf-min" value="1" min="0" max="99">
+          <button type="button" class="qty-btn" id="cf-min-i">＋</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">保存期限（選填）</label>
+        <input type="date" class="finput" id="cf-expiry">
+      </div>
+      <div class="fg">
+        <label class="flabel">購買金額（選填）</label>
+        <div class="price-row"><span class="currency">NT$</span><input type="number" class="finput price-input" id="cf-price" placeholder="0" min="0"></div>
+      </div>
+      <div class="fg">
+        <label class="flabel">備註（選填）</label>
+        <input type="text" class="finput" id="cf-notes" placeholder="例：8/25配送、初開封">
+      </div>
+      <button class="save-btn" id="cat-food-save">💾 儲存</button>
+    </div>
+  </div>
+
+  <!-- SLIDE: Cat Supply Form -->
+  <div id="sl-cat-supply" class="slide">
+    <div class="hdr">
+      <div class="hdr-row">
+        <button class="back-btn" id="cat-supply-back">← 返回</button>
+        <h1 id="cat-supply-form-title">新增用品</h1>
+      </div>
+    </div>
+    <div class="form-wrap">
+      <div class="fg">
+        <label class="flabel">品名 <span class="req">*</span></label>
+        <input type="text" class="finput" id="cs-name" placeholder="例：礦砂、豆腐砂">
+      </div>
+      <div class="fg">
+        <label class="flabel">種類</label>
+        <div class="gcat-row">
+          <button class="gcat-btn active" data-cscat="litter">🪣 貓砂</button>
+          <button class="gcat-btn" data-cscat="grooming">✂️ 美容</button>
+          <button class="gcat-btn" data-cscat="toy">🎾 玩具</button>
+          <button class="gcat-btn" data-cscat="other">📦 其他</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">現有數量</label>
+        <div class="qty-stepper">
+          <button type="button" class="qty-btn" id="cs-qty-d">－</button>
+          <input type="number" class="qty-input" id="cs-qty" value="1" min="0" max="99">
+          <button type="button" class="qty-btn" id="cs-qty-i">＋</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">最低庫存（低於此數量提醒補貨）</label>
+        <div class="qty-stepper">
+          <button type="button" class="qty-btn" id="cs-min-d">－</button>
+          <input type="number" class="qty-input" id="cs-min" value="1" min="0" max="99">
+          <button type="button" class="qty-btn" id="cs-min-i">＋</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="flabel">購買金額（選填）</label>
+        <div class="price-row"><span class="currency">NT$</span><input type="number" class="finput price-input" id="cs-price" placeholder="0" min="0"></div>
+      </div>
+      <div class="fg">
+        <label class="flabel">備註（選填）</label>
+        <input type="text" class="finput" id="cs-notes" placeholder="例：豆腐砂 6L、礦砂 10kg">
+      </div>
+      <button class="save-btn" id="cat-supply-save">💾 儲存</button>
     </div>
   </div>
 
@@ -398,7 +521,8 @@
 <nav class="bottom-nav">
   <button class="nav-btn active" data-pg="food"><span class="ni">🥬</span><span>食品</span></button>
   <button class="nav-btn" data-pg="grocery"><span class="ni">🧴</span><span>雜貨</span></button>
-  <button class="nav-btn" data-pg="shop"><span class="ni">🛒</span><span>購物清單</span></button>
+  <button class="nav-btn" data-pg="cat"><span class="ni">🐱</span><span>貓咪</span></button>
+  <button class="nav-btn" data-pg="shop"><span class="ni">🛒</span><span>購物</span></button>
   <button class="nav-btn" data-pg="stats"><span class="ni">📊</span><span>統計</span></button>
 </nav>
 
@@ -430,16 +554,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 // ── Data ──
-const FK='food-tracker-items', GK='grocery-tracker-items';
+const FK='food-tracker-items', GK='grocery-tracker-items', CFK='cat-food-items', CSK='cat-supply-items';
 const loadF=()=>{try{return JSON.parse(localStorage.getItem(FK)||'[]')}catch{return[]}};
 const loadG=()=>{try{return JSON.parse(localStorage.getItem(GK)||'[]')}catch{return[]}};
+const loadCF=()=>{try{return JSON.parse(localStorage.getItem(CFK)||'[]')}catch{return[]}};
+const loadCS=()=>{try{return JSON.parse(localStorage.getItem(CSK)||'[]')}catch{return[]}};
 const saveF=a=>localStorage.setItem(FK,JSON.stringify(a));
 const saveG=a=>localStorage.setItem(GK,JSON.stringify(a));
-let foods=loadF(), groceries=loadG();
+const saveCF=a=>localStorage.setItem(CFK,JSON.stringify(a));
+const saveCS=a=>localStorage.setItem(CSK,JSON.stringify(a));
+let foods=loadF(), groceries=loadG(), catFoods=loadCF(), catSupplies=loadCS();
 
 // ── State ──
-let curPage='food', foodTab='date', fCat='refrigerated', gCat='cleaning';
-let editFId=null, editGId=null, delId=null, delType=null;
+let curPage='food', foodTab='date', fCat='refrigerated', gCat='cleaning', catTab='food', cfCat='dry', csCat='litter';
+let editFId=null, editGId=null, editCFId=null, editCSId=null, delId=null, delType=null;
 let boughtId=null, boughtType=null, boughtQty=1;
 let rDest='food', rFCat='refrigerated', rGCat='cleaning';
 let statsMonth=monthStr(), pieChart=null;
@@ -457,7 +585,9 @@ function fStatus(n){if(n===null)return'no-expiry';if(n<0)return'expired';if(n<=7
 
 const FL={refrigerated:'❄️ 冷藏',frozen:'🧊 冷凍',ambient:'🌡️ 常溫'};
 const GL={cleaning:'🧴 清潔衛浴',health:'💊 藥品保健',kitchen:'🍳 廚房用品',pet:'🐾 寵物用品',books:'📚 書籍',other:'📦 其他'};
-const COLORS={food:'#16a34a',cleaning:'#3b82f6',health:'#ec4899',kitchen:'#f59e0b',pet:'#22c55e',books:'#8b5cf6',other:'#94a3b8'};
+const CFL={dry:'🥩 乾糧',wet:'🍱 罐頭',treat:'🐟 零食',other:'📦 其他'};
+const CSL={litter:'🪣 貓砂',grooming:'✂️ 美容',toy:'🎾 玩具',other:'📦 其他'};
+const COLORS={food:'#16a34a',cleaning:'#3b82f6',health:'#ec4899',kitchen:'#f59e0b',pet:'#22c55e',books:'#8b5cf6',other:'#94a3b8',cat:'#f97316'};
 
 // ── Navigation ──
 function showPage(pg){
@@ -466,6 +596,7 @@ function showPage(pg){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.pg===pg));
   if(pg==='food')renderFood();
   else if(pg==='grocery')renderGrocery();
+  else if(pg==='cat')renderCat();
   else if(pg==='shop')renderShop();
   else if(pg==='stats')renderStats();
 }
@@ -498,6 +629,61 @@ function foodCard(it){
     </div>
     <div class="days-pill ${st}">${daysLabel(n)}</div>
     <button class="del-btn" data-fid="${it.id}">✕</button>
+  </div>`;
+}
+
+// ── Cat Render ──
+function renderCat(){
+  const el=q('cat-list');
+  if(catTab==='food'){
+    if(!catFoods.length){el.innerHTML=`<div class="empty-state"><div class="big">🥩</div><p>還沒有糧食紀錄<br>點右下角 <strong>+</strong> 新增！</p></div>`;return}
+    el.innerHTML=Object.keys(CFL).map(k=>{
+      const list=catFoods.filter(i=>i.category===k);
+      if(!list.length)return'';
+      return`<div class="cat-group"><div class="cat-group-title">${CFL[k]}（${list.length}）</div>${list.map(catFoodCard).join('')}</div>`;
+    }).join('');
+  }else{
+    if(!catSupplies.length){el.innerHTML=`<div class="empty-state"><div class="big">🪣</div><p>還沒有用品紀錄<br>點右下角 <strong>+</strong> 新增！</p></div>`;return}
+    el.innerHTML=Object.keys(CSL).map(k=>{
+      const list=catSupplies.filter(i=>i.category===k);
+      if(!list.length)return'';
+      return`<div class="cat-group"><div class="cat-group-title">${CSL[k]}（${list.length}）</div>${list.map(catSupplyCard).join('')}</div>`;
+    }).join('');
+  }
+}
+function catFoodCard(it){
+  const n=it.expiryDate?daysLeft(it.expiryDate):null;
+  const qty=it.quantity||1;
+  const isLow=it.minStock!=null&&qty<=it.minStock;
+  const st=it.expiryDate?fStatus(n):(isLow?'warning':'safe');
+  return`<div class="food-card ${st}" data-cfid="${it.id}">
+    <div class="card-body">
+      <div class="card-name">${esc(it.name)}${qty>1?` <span class="card-qty">×${qty}</span>`:''}</div>
+      <div class="card-meta">
+        <span class="badge ${it.category}">${CFL[it.category]||it.category}</span>
+        ${it.expiryDate?`<span class="card-date">📅 ${fmtDate(it.expiryDate)}</span>`:''}
+        ${it.price?`<span class="card-price">💰 NT$${Number(it.price).toLocaleString()}</span>`:''}
+      </div>
+      ${it.notes?`<div class="card-notes">📝 ${esc(it.notes)}</div>`:''}
+    </div>
+    ${it.expiryDate?`<div class="days-pill ${fStatus(n)}">${daysLabel(n)}</div>`:`<div class="stock-pill ${isLow?'low':'ok'}">${isLow?'需補貨':`庫存 ${qty}`}</div>`}
+    <button class="del-btn" data-cfid="${it.id}">✕</button>
+  </div>`;
+}
+function catSupplyCard(it){
+  const isLow=it.minStock!=null&&it.quantity<=it.minStock;
+  return`<div class="grocery-card ${isLow?'low':'ok'}" data-csid="${it.id}">
+    <div class="card-body">
+      <div class="card-name">${esc(it.name)} <span class="card-qty">×${it.quantity}</span></div>
+      <div class="card-meta">
+        <span class="badge ${it.category}">${CSL[it.category]||it.category}</span>
+        ${it.minStock!=null?`<span class="card-price">最低 ${it.minStock}</span>`:''}
+        ${it.price?`<span class="card-price">💰 NT$${Number(it.price).toLocaleString()}</span>`:''}
+      </div>
+      ${it.notes?`<div class="card-notes">📝 ${esc(it.notes)}</div>`:''}
+    </div>
+    <div class="stock-pill ${isLow?'low':'ok'}">${isLow?'需補貨':`庫存 ${it.quantity}`}</div>
+    <button class="del-btn" data-csid="${it.id}">✕</button>
   </div>`;
 }
 
@@ -538,6 +724,12 @@ function renderShop(){
   const items=[];
   foods.forEach(f=>{const n=daysLeft(f.expiryDate);if(n!==null&&n<=7)items.push({id:f.id,type:'food',name:f.name,reason:daysLabel(n),urgent:n<0})});
   groceries.forEach(g=>{if(g.category==='books')return;if(g.minStock!=null&&g.quantity<=g.minStock)items.push({id:g.id,type:'grocery',name:g.name,reason:`庫存剩 ${g.quantity}，最低 ${g.minStock}`,urgent:g.quantity===0})});
+  catFoods.forEach(cf=>{
+    const n=cf.expiryDate?daysLeft(cf.expiryDate):null;
+    if(n!==null&&n<=7)items.push({id:cf.id,type:'catfood',name:cf.name,reason:'糧食 '+daysLabel(n),urgent:n<0});
+    else if(cf.minStock!=null&&cf.quantity<=cf.minStock)items.push({id:cf.id,type:'catfood',name:cf.name,reason:`庫存剩 ${cf.quantity}，最低 ${cf.minStock}`,urgent:cf.quantity===0});
+  });
+  catSupplies.forEach(cs=>{if(cs.minStock!=null&&cs.quantity<=cs.minStock)items.push({id:cs.id,type:'catsupply',name:cs.name,reason:`庫存剩 ${cs.quantity}，最低 ${cs.minStock}`,urgent:cs.quantity===0})});
   if(!items.length){el.innerHTML=`<div class="empty-state"><div class="big">✅</div><p>太棒了！<br>目前沒有需要補充的品項</p></div>`;return}
   items.sort((a,b)=>b.urgent-a.urgent);
   el.innerHTML=items.map(i=>`<div class="shop-card">
@@ -556,15 +748,19 @@ function renderStats(){
   const totals={};let grand=0;
   foods.filter(i=>i.addedMonth===statsMonth&&i.price).forEach(i=>{totals.food=(totals.food||0)+Number(i.price);grand+=Number(i.price)});
   groceries.filter(i=>i.price&&i.purchaseDate&&i.purchaseDate.startsWith(statsMonth)).forEach(i=>{totals[i.category]=(totals[i.category]||0)+Number(i.price);grand+=Number(i.price)});
+  catFoods.filter(i=>i.price&&i.addedMonth===statsMonth).forEach(i=>{totals.cat=(totals.cat||0)+Number(i.price);grand+=Number(i.price)});
+  catSupplies.filter(i=>i.price&&i.purchaseDate&&i.purchaseDate.startsWith(statsMonth)).forEach(i=>{totals.cat=(totals.cat||0)+Number(i.price);grand+=Number(i.price)});
   const sb=q('stats-body');
   if(!grand){sb.innerHTML=`<div class="empty-state"><div class="big">📊</div><p>這個月還沒有花費記錄</p></div>`;if(pieChart){pieChart.destroy();pieChart=null}return}
   const keys=Object.keys(totals);
   const breakdown=keys.map(k=>{
     const pct=Math.round(totals[k]/grand*100);
-    const lbl=k==='food'?'🥬 食品':GL[k];
+    const lbl=k==='food'?'🥬 食品':k==='cat'?'🐱 貓咪':GL[k];
     const clr=COLORS[k]||'#94a3b8';
     const itemsHtml=k==='food'
       ?foods.filter(i=>i.addedMonth===statsMonth&&i.price).map(i=>`<div class="stats-item"><span>${esc(i.name)}</span><span>NT$${Number(i.price).toLocaleString()}</span></div>`).join('')
+      :k==='cat'
+      ?[...catFoods.filter(i=>i.addedMonth===statsMonth&&i.price),...catSupplies.filter(i=>i.price&&i.purchaseDate&&i.purchaseDate.startsWith(statsMonth))].map(i=>`<div class="stats-item"><span>${esc(i.name)}</span><span>NT$${Number(i.price).toLocaleString()}</span></div>`).join('')
       :groceries.filter(i=>i.category===k&&i.price&&i.purchaseDate&&i.purchaseDate.startsWith(statsMonth)).map(i=>`<div class="stats-item"><span>${esc(i.name)}</span><span>NT$${Number(i.price).toLocaleString()}</span></div>`).join('');
     return`<div class="stats-row" data-sk="${k}"><div class="stats-dot" style="background:${clr}"></div><div class="stats-cat">${lbl}</div><div class="stats-amt">NT$${totals[k].toLocaleString()}</div><div class="stats-pct">${pct}%</div></div><div class="stats-items" id="si-${k}">${itemsHtml}</div>`;
   }).join('');
@@ -596,6 +792,48 @@ function saveFoodForm(){
   saveF(foods);closeFoodSlide();renderFood();
 }
 
+// ── Cat Food Form ──
+function openCatFoodAdd(){editCFId=null;resetCatFoodForm();q('cat-food-form-title').textContent='新增糧食';q('cat-food-save').textContent='💾 儲存';q('sl-cat-food').classList.add('open')}
+function openCatFoodEdit(id){
+  const it=catFoods.find(i=>i.id===id);if(!it)return;editCFId=id;
+  q('cf-name').value=it.name;q('cf-qty').value=it.quantity||1;q('cf-min').value=it.minStock??1;q('cf-expiry').value=it.expiryDate||'';q('cf-price').value=it.price||'';q('cf-notes').value=it.notes||'';
+  cfCat=it.category;document.querySelectorAll('[data-cfcat]').forEach(b=>b.classList.toggle('active',b.dataset.cfcat===cfCat));
+  q('cat-food-form-title').textContent='編輯糧食';q('cat-food-save').textContent='💾 儲存修改';q('sl-cat-food').classList.add('open');
+}
+function closeCatFoodSlide(){q('sl-cat-food').classList.remove('open');resetCatFoodForm()}
+function resetCatFoodForm(){
+  editCFId=null;q('cf-name').value='';q('cf-qty').value='1';q('cf-min').value='1';q('cf-expiry').value='';q('cf-price').value='';q('cf-notes').value='';
+  cfCat='dry';document.querySelectorAll('[data-cfcat]').forEach(b=>b.classList.toggle('active',b.dataset.cfcat==='dry'));
+}
+function saveCatFoodForm(){
+  const name=q('cf-name').value.trim(),qty=Math.max(1,parseInt(q('cf-qty').value)||1),minS=Math.max(0,parseInt(q('cf-min').value)||0),expiry=q('cf-expiry').value,price=q('cf-price').value,notes=q('cf-notes').value.trim();
+  if(!name){alert('請輸入品名！');return}
+  if(editCFId){const i=catFoods.findIndex(x=>x.id===editCFId);if(i!==-1)catFoods[i]={...catFoods[i],name,category:cfCat,quantity:qty,minStock:minS,expiryDate:expiry||null,price:price?Number(price):null,notes:notes||null}}
+  else catFoods.push({id:Date.now()+'',name,category:cfCat,quantity:qty,minStock:minS,expiryDate:expiry||null,price:price?Number(price):null,notes:notes||null,addedMonth:monthStr()});
+  saveCF(catFoods);closeCatFoodSlide();renderCat();
+}
+
+// ── Cat Supply Form ──
+function openCatSupplyAdd(){editCSId=null;resetCatSupplyForm();q('cat-supply-form-title').textContent='新增用品';q('cat-supply-save').textContent='💾 儲存';q('sl-cat-supply').classList.add('open')}
+function openCatSupplyEdit(id){
+  const it=catSupplies.find(i=>i.id===id);if(!it)return;editCSId=id;
+  q('cs-name').value=it.name;q('cs-qty').value=it.quantity;q('cs-min').value=it.minStock??1;q('cs-price').value=it.price||'';q('cs-notes').value=it.notes||'';
+  csCat=it.category;document.querySelectorAll('[data-cscat]').forEach(b=>b.classList.toggle('active',b.dataset.cscat===csCat));
+  q('cat-supply-form-title').textContent='編輯用品';q('cat-supply-save').textContent='💾 儲存修改';q('sl-cat-supply').classList.add('open');
+}
+function closeCatSupplySlide(){q('sl-cat-supply').classList.remove('open');resetCatSupplyForm()}
+function resetCatSupplyForm(){
+  editCSId=null;q('cs-name').value='';q('cs-qty').value='1';q('cs-min').value='1';q('cs-price').value='';q('cs-notes').value='';
+  csCat='litter';document.querySelectorAll('[data-cscat]').forEach(b=>b.classList.toggle('active',b.dataset.cscat==='litter'));
+}
+function saveCatSupplyForm(){
+  const name=q('cs-name').value.trim(),qty=Math.max(0,parseInt(q('cs-qty').value)||0),minS=Math.max(0,parseInt(q('cs-min').value)||0),price=q('cs-price').value,notes=q('cs-notes').value.trim();
+  if(!name){alert('請輸入品名！');return}
+  if(editCSId){const i=catSupplies.findIndex(x=>x.id===editCSId);if(i!==-1)catSupplies[i]={...catSupplies[i],name,category:csCat,quantity:qty,minStock:minS,price:price?Number(price):null,notes:notes||null}}
+  else catSupplies.push({id:Date.now()+'',name,category:csCat,quantity:qty,minStock:minS,purchaseDate:today(),price:price?Number(price):null,notes:notes||null});
+  saveCS(catSupplies);closeCatSupplySlide();renderCat();
+}
+
 // ── Grocery Form ──
 function openGroceryAdd(){editGId=null;resetGroceryForm();q('grocery-form-title').textContent='新增雜貨';q('grocery-save').textContent='💾 儲存';q('grocery-cam-zone').style.display='';q('sl-grocery').classList.add('open')}
 function openGroceryEdit(id){
@@ -621,7 +859,7 @@ function saveGroceryForm(){
 // ── Delete ──
 function openDel(id,type){
   delId=id;delType=type;
-  const it=type==='food'?foods.find(i=>i.id===id):groceries.find(i=>i.id===id);if(!it)return;
+  const it=type==='food'?foods.find(i=>i.id===id):type==='grocery'?groceries.find(i=>i.id===id):type==='catfood'?catFoods.find(i=>i.id===id):catSupplies.find(i=>i.id===id);if(!it)return;
   const qty=it.quantity||1;
   const close=()=>{delId=null;delType=null;q('del-overlay').classList.remove('open')};
   if(qty>1){
@@ -629,7 +867,9 @@ function openDel(id,type){
     q('del-btns').innerHTML=`<button class="btn-green" id="del-one">✅ 用掉一份（剩 ${qty-1} 份）</button><button class="btn-red" id="del-all">🗑 全部刪除</button><button class="btn-gray" id="del-no">取消</button>`;
     q('del-one').addEventListener('click',()=>{
       if(delType==='food'){const i=foods.findIndex(x=>x.id===delId);if(i!==-1){foods[i].quantity=(foods[i].quantity||1)-1;if(foods[i].quantity<=0)foods.splice(i,1);saveF(foods);renderFood()}}
-      else{const i=groceries.findIndex(x=>x.id===delId);if(i!==-1){groceries[i].quantity=Math.max(0,(groceries[i].quantity||1)-1);saveG(groceries);renderGrocery()}}
+      else if(delType==='grocery'){const i=groceries.findIndex(x=>x.id===delId);if(i!==-1){groceries[i].quantity=Math.max(0,(groceries[i].quantity||1)-1);saveG(groceries);renderGrocery()}}
+      else if(delType==='catfood'){const i=catFoods.findIndex(x=>x.id===delId);if(i!==-1){catFoods[i].quantity=(catFoods[i].quantity||1)-1;if(catFoods[i].quantity<=0)catFoods.splice(i,1);saveCF(catFoods);renderCat()}}
+      else{const i=catSupplies.findIndex(x=>x.id===delId);if(i!==-1){catSupplies[i].quantity=Math.max(0,(catSupplies[i].quantity||1)-1);saveCS(catSupplies);renderCat()}}
       close();
     });
   }else{
@@ -639,7 +879,9 @@ function openDel(id,type){
   q('del-overlay').classList.add('open');
   q('del-all').addEventListener('click',()=>{
     if(delType==='food'){foods=foods.filter(i=>i.id!==delId);saveF(foods);renderFood()}
-    else{groceries=groceries.filter(i=>i.id!==delId);saveG(groceries);renderGrocery()}
+    else if(delType==='grocery'){groceries=groceries.filter(i=>i.id!==delId);saveG(groceries);renderGrocery()}
+    else if(delType==='catfood'){catFoods=catFoods.filter(i=>i.id!==delId);saveCF(catFoods);renderCat()}
+    else{catSupplies=catSupplies.filter(i=>i.id!==delId);saveCS(catSupplies);renderCat()}
     close();
   });
   q('del-no').addEventListener('click',close);
@@ -648,7 +890,7 @@ function openDel(id,type){
 // ── Bought ──
 function openBought(id,type){
   boughtId=id;boughtType=type;boughtQty=1;
-  const it=type==='food'?foods.find(i=>i.id===id):groceries.find(i=>i.id===id);if(!it)return;
+  const it=type==='food'?foods.find(i=>i.id===id):type==='grocery'?groceries.find(i=>i.id===id):type==='catfood'?catFoods.find(i=>i.id===id):catSupplies.find(i=>i.id===id);if(!it)return;
   q('bought-msg').innerHTML=`「<strong>${esc(it.name)}</strong>」買了幾個？`;
   q('bq-num').textContent='1';
   q('bought-overlay').classList.add('open');
@@ -781,20 +1023,27 @@ function registerSW(){if('serviceWorker'in navigator)navigator.serviceWorker.reg
   // FABs
   q('food-fab').addEventListener('click',openFoodAdd);
   q('grocery-fab').addEventListener('click',openGroceryAdd);
+  q('cat-fab').addEventListener('click',()=>{if(catTab==='food')openCatFoodAdd();else openCatSupplyAdd()});
 
   // Backs
   q('food-back').addEventListener('click',closeFoodSlide);
   q('grocery-back').addEventListener('click',closeGrocerySlide);
+  q('cat-food-back').addEventListener('click',closeCatFoodSlide);
+  q('cat-supply-back').addEventListener('click',closeCatSupplySlide);
   q('receipt-back').addEventListener('click',()=>q('sl-receipt').classList.remove('open'));
 
   // Food cat buttons
   document.querySelectorAll('[data-fcat]').forEach(b=>b.addEventListener('click',()=>{fCat=b.dataset.fcat;document.querySelectorAll('[data-fcat]').forEach(x=>x.classList.remove('active'));b.classList.add('active')}));
   // Grocery cat buttons
   document.querySelectorAll('[data-gcat]').forEach(b=>b.addEventListener('click',()=>{gCat=b.dataset.gcat;document.querySelectorAll('[data-gcat]').forEach(x=>x.classList.remove('active'));b.classList.add('active');updateMinFg()}));
+  // Cat food cat buttons
+  document.querySelectorAll('[data-cfcat]').forEach(b=>b.addEventListener('click',()=>{cfCat=b.dataset.cfcat;document.querySelectorAll('[data-cfcat]').forEach(x=>x.classList.remove('active'));b.classList.add('active')}));
+  // Cat supply cat buttons
+  document.querySelectorAll('[data-cscat]').forEach(b=>b.addEventListener('click',()=>{csCat=b.dataset.cscat;document.querySelectorAll('[data-cscat]').forEach(x=>x.classList.remove('active'));b.classList.add('active')}));
 
   // Qty steppers
   const step=(id,min,max)=>{q(id+'-d').addEventListener('click',()=>{const i=q(id);const v=parseInt(i.value)||0;if(v>min)i.value=v-1});q(id+'-i').addEventListener('click',()=>{const i=q(id);const v=parseInt(i.value)||0;if(v<max)i.value=v+1})};
-  step('f-qty',1,99);step('g-qty',0,99);step('g-min',0,99);
+  step('f-qty',1,99);step('g-qty',0,99);step('g-min',0,99);step('cf-qty',1,99);step('cf-min',0,99);step('cs-qty',0,99);step('cs-min',0,99);
 
   // Food camera
   q('food-cam-in').addEventListener('change',async e=>{
@@ -808,6 +1057,8 @@ function registerSW(){if('serviceWorker'in navigator)navigator.serviceWorker.reg
   // Saves
   q('food-save').addEventListener('click',saveFoodForm);
   q('grocery-save').addEventListener('click',saveGroceryForm);
+  q('cat-food-save').addEventListener('click',saveCatFoodForm);
+  q('cat-supply-save').addEventListener('click',saveCatSupplyForm);
   q('receipt-save').addEventListener('click',saveReceiptItems);
 
   // Receipt destination
@@ -826,13 +1077,26 @@ function registerSW(){if('serviceWorker'in navigator)navigator.serviceWorker.reg
     const b=e.target.closest('.card-body');if(b){const c=b.closest('[data-gid]');if(c)openGroceryEdit(c.dataset.gid)}
   });
   q('shop-list').addEventListener('click',e=>{const b=e.target.closest('.bought-btn');if(b)openBought(b.dataset.bid,b.dataset.btype)});
+  q('cat-list').addEventListener('click',e=>{
+    const d=e.target.closest('.del-btn[data-cfid]');if(d){openDel(d.dataset.cfid,'catfood');return}
+    const d2=e.target.closest('.del-btn[data-csid]');if(d2){openDel(d2.dataset.csid,'catsupply');return}
+    const b=e.target.closest('.card-body');if(b){
+      const cf=b.closest('[data-cfid]');if(cf){openCatFoodEdit(cf.dataset.cfid);return}
+      const cs=b.closest('[data-csid]');if(cs)openCatSupplyEdit(cs.dataset.csid);
+    }
+  });
+  // Cat sub-tabs
+  q('ctab-food').addEventListener('click',()=>{catTab='food';q('ctab-food').classList.add('active');q('ctab-supply').classList.remove('active');renderCat()});
+  q('ctab-supply').addEventListener('click',()=>{catTab='supply';q('ctab-supply').classList.add('active');q('ctab-food').classList.remove('active');renderCat()});
 
   // Bought modal
   q('bq-d').addEventListener('click',()=>{if(boughtQty>1){boughtQty--;q('bq-num').textContent=boughtQty}});
   q('bq-i').addEventListener('click',()=>{if(boughtQty<99){boughtQty++;q('bq-num').textContent=boughtQty}});
   q('bq-ok').addEventListener('click',()=>{
     if(boughtType==='food'){const i=foods.findIndex(x=>x.id===boughtId);if(i!==-1){foods[i].quantity=(foods[i].quantity||1)+boughtQty;foods[i].addedMonth=monthStr();saveF(foods);renderFood()}}
-    else{const i=groceries.findIndex(x=>x.id===boughtId);if(i!==-1){groceries[i].quantity+=boughtQty;groceries[i].purchaseDate=today();saveG(groceries);renderGrocery()}}
+    else if(boughtType==='grocery'){const i=groceries.findIndex(x=>x.id===boughtId);if(i!==-1){groceries[i].quantity+=boughtQty;groceries[i].purchaseDate=today();saveG(groceries);renderGrocery()}}
+    else if(boughtType==='catfood'){const i=catFoods.findIndex(x=>x.id===boughtId);if(i!==-1){catFoods[i].quantity=(catFoods[i].quantity||1)+boughtQty;catFoods[i].addedMonth=monthStr();saveCF(catFoods);renderCat()}}
+    else{const i=catSupplies.findIndex(x=>x.id===boughtId);if(i!==-1){catSupplies[i].quantity+=boughtQty;catSupplies[i].purchaseDate=today();saveCS(catSupplies);renderCat()}}
     q('bought-overlay').classList.remove('open');renderShop();
   });
   q('bq-cancel').addEventListener('click',()=>q('bought-overlay').classList.remove('open'));
@@ -848,6 +1112,8 @@ function registerSW(){if('serviceWorker'in navigator)navigator.serviceWorker.reg
 // ── Init ──
 (function init(){
   resetGroceryForm();
+  resetCatFoodForm();
+  resetCatSupplyForm();
   showPage('food');
   registerSW();
   addAppleIcon();
