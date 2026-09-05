@@ -319,7 +319,6 @@
           <button class="gcat-btn active" data-gcat="cleaning">🧴 清潔衛浴</button>
           <button class="gcat-btn" data-gcat="health">💊 藥品保健</button>
           <button class="gcat-btn" data-gcat="kitchen">🍳 廚房用品</button>
-          <button class="gcat-btn" data-gcat="pet">🐾 寵物用品</button>
           <button class="gcat-btn" data-gcat="books">📚 書籍</button>
           <button class="gcat-btn" data-gcat="other">📦 其他</button>
         </div>
@@ -510,7 +509,6 @@
           <button class="gcat-btn active" data-rgcat="cleaning">🧴 清潔衛浴</button>
           <button class="gcat-btn" data-rgcat="health">💊 藥品保健</button>
           <button class="gcat-btn" data-rgcat="kitchen">🍳 廚房用品</button>
-          <button class="gcat-btn" data-rgcat="pet">🐾 寵物用品</button>
           <button class="gcat-btn" data-rgcat="books">📚 書籍</button>
           <button class="gcat-btn" data-rgcat="other">📦 其他</button>
         </div>
@@ -588,7 +586,7 @@ function daysLabel(n){if(n===null)return'需補期限';if(n<0)return`過期${Mat
 function fStatus(n){if(n===null)return'no-expiry';if(n<0)return'expired';if(n<=7)return'warning';return'safe'}
 
 const FL={refrigerated:'❄️ 冷藏',frozen:'🧊 冷凍',ambient:'🌡️ 常溫'};
-const GL={cleaning:'🧴 清潔衛浴',health:'💊 藥品保健',kitchen:'🍳 廚房用品',pet:'🐾 寵物用品',books:'📚 書籍',other:'📦 其他'};
+const GL={cleaning:'🧴 清潔衛浴',health:'💊 藥品保健',kitchen:'🍳 廚房用品',books:'📚 書籍',other:'📦 其他'};
 const CFL={dry:'🥩 乾糧',wet:'🍱 罐頭',treat:'🐟 零食',other:'📦 其他'};
 const CSL={litter:'🪣 貓砂',grooming:'✂️ 美容',toy:'🎾 玩具',other:'📦 其他'};
 const COLORS={food:'#16a34a',cleaning:'#3b82f6',health:'#ec4899',kitchen:'#f59e0b',pet:'#22c55e',books:'#8b5cf6',other:'#94a3b8',cat:'#f97316'};
