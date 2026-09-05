@@ -1,4 +1,4 @@
-const CACHE = 'food-tracker-v3';
+const CACHE = 'food-tracker-v4';
 const ASSETS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
