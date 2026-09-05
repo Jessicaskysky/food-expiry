@@ -260,6 +260,10 @@
         <input type="text" class="finput" id="f-name" placeholder="例：雞蛋、牛奶">
       </div>
       <div class="fg">
+        <label class="flabel">購入日期</label>
+        <input type="date" class="finput" id="f-purchase">
+      </div>
+      <div class="fg">
         <label class="flabel">保存期限 <span class="req">*</span></label>
         <input type="date" class="finput" id="f-expiry">
       </div>
@@ -625,6 +629,7 @@ function foodCard(it){
         <span class="badge ${it.category}">${FL[it.category]||it.category}</span>
         ${it.price?`<span class="card-price">💰 NT$${Number(it.price).toLocaleString()}</span>`:''}
       </div>
+      ${it.purchaseDate?`<div class="card-notes">🛒 購入 ${fmtDate(it.purchaseDate)}</div>`:''}
       ${it.notes?`<div class="card-notes">📝 ${esc(it.notes)}</div>`:''}
     </div>
     <div class="days-pill ${st}">${daysLabel(n)}</div>
@@ -774,21 +779,21 @@ function renderStats(){
 function openFoodAdd(){editFId=null;resetFoodForm();q('food-form-title').textContent='新增食品';q('food-save').textContent='💾 儲存';q('food-cam-zone').style.display='';q('sl-food').classList.add('open')}
 function openFoodEdit(id){
   const it=foods.find(i=>i.id===id);if(!it)return;editFId=id;
-  q('f-name').value=it.name;q('f-expiry').value=it.expiryDate||'';q('f-qty').value=it.quantity||1;q('f-price').value=it.price||'';q('f-notes').value=it.notes||'';
+  q('f-name').value=it.name;q('f-purchase').value=it.purchaseDate||'';q('f-expiry').value=it.expiryDate||'';q('f-qty').value=it.quantity||1;q('f-price').value=it.price||'';q('f-notes').value=it.notes||'';
   fCat=it.category;document.querySelectorAll('[data-fcat]').forEach(b=>b.classList.toggle('active',b.dataset.fcat===fCat));
   q('food-cam-zone').style.display='none';q('food-form-title').textContent='編輯食品';q('food-save').textContent='💾 儲存修改';q('sl-food').classList.add('open');
 }
 function closeFoodSlide(){q('sl-food').classList.remove('open');resetFoodForm()}
 function resetFoodForm(){
-  editFId=null;q('f-name').value='';q('f-expiry').value='';q('f-qty').value='1';q('f-price').value='';q('f-notes').value='';
+  editFId=null;q('f-name').value='';q('f-purchase').value=today();q('f-expiry').value='';q('f-qty').value='1';q('f-price').value='';q('f-notes').value='';
   q('food-cam-in').value='';q('food-photo').style.display='none';q('food-ocr').style.display='none';q('food-ocr').style.color='';q('food-cam-lbl').textContent='📷 拍照辨識保存期限';
   q('food-cam-zone').style.display='';fCat='refrigerated';document.querySelectorAll('[data-fcat]').forEach(b=>b.classList.toggle('active',b.dataset.fcat==='refrigerated'));
 }
 function saveFoodForm(){
-  const name=q('f-name').value.trim(),expiry=q('f-expiry').value,qty=Math.max(1,parseInt(q('f-qty').value)||1),price=q('f-price').value,notes=q('f-notes').value.trim();
+  const name=q('f-name').value.trim(),purchase=q('f-purchase').value,expiry=q('f-expiry').value,qty=Math.max(1,parseInt(q('f-qty').value)||1),price=q('f-price').value,notes=q('f-notes').value.trim();
   if(!name){alert('請輸入品名！');return}if(!expiry){alert('請輸入保存期限！');return}
-  if(editFId){const i=foods.findIndex(x=>x.id===editFId);if(i!==-1)foods[i]={...foods[i],name,expiryDate:expiry,category:fCat,quantity:qty,price:price?Number(price):null,notes:notes||null}}
-  else foods.push({id:Date.now()+'',name,expiryDate:expiry,category:fCat,quantity:qty,price:price?Number(price):null,notes:notes||null,addedMonth:monthStr()});
+  if(editFId){const i=foods.findIndex(x=>x.id===editFId);if(i!==-1)foods[i]={...foods[i],name,purchaseDate:purchase||null,expiryDate:expiry,category:fCat,quantity:qty,price:price?Number(price):null,notes:notes||null}}
+  else foods.push({id:Date.now()+'',name,purchaseDate:purchase||null,expiryDate:expiry,category:fCat,quantity:qty,price:price?Number(price):null,notes:notes||null,addedMonth:monthStr()});
   saveF(foods);closeFoodSlide();renderFood();
 }
 
@@ -978,7 +983,7 @@ function saveReceiptItems(){
     const priceV=row.querySelector(`.rp[data-i="${i}"]`)?.value;
     if(!name)return;
     const id=Date.now()+Math.random()+'';
-    if(rDest==='food')foods.push({id,name,expiryDate:'',category:rFCat,quantity:qty,price:priceV?Number(priceV):null,notes:null,addedMonth:now});
+    if(rDest==='food')foods.push({id,name,purchaseDate:today(),expiryDate:'',category:rFCat,quantity:qty,price:priceV?Number(priceV):null,notes:null,addedMonth:now});
     else groceries.push({id,name,category:rGCat,quantity:qty,minStock:rGCat==='books'?null:1,purchaseDate:today(),price:priceV?Number(priceV):null,notes:null});
   });
   if(rDest==='food'){saveF(foods);q('sl-receipt').classList.remove('open');showPage('food');alert('已加入食品清單！\n記得點各品項補上保存期限 📅')}
