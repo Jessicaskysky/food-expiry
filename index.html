@@ -769,7 +769,7 @@ function renderStats(){
   }).join('');
   sb.innerHTML=`<div class="stats-total">NT$${grand.toLocaleString()}</div><div class="stats-label">本月合計（有填金額的品項）</div><div class="chart-wrap"><canvas id="pie-c"></canvas></div><div class="stats-breakdown">${breakdown}</div>`;
   if(pieChart){pieChart.destroy();pieChart=null}
-  pieChart=new Chart(q('pie-c').getContext('2d'),{type:'doughnut',data:{labels:keys.map(k=>k==='food'?'🥬 食品':GL[k]),datasets:[{data:keys.map(k=>totals[k]),backgroundColor:keys.map(k=>COLORS[k]||'#94a3b8'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:12},padding:12}},tooltip:{callbacks:{label:c=>` NT$${c.parsed.toLocaleString()}`}}}}});
+  pieChart=new Chart(q('pie-c').getContext('2d'),{type:'doughnut',data:{labels:keys.map(k=>k==='food'?'🥬 食品':GL[k]),datasets:[{data:keys.map(k=>totals[k]),backgroundColor:keys.map(k=>COLORS[k]||'#94a3b8'),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,cutout:'55%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` NT$${c.parsed.toLocaleString()}`}}}}});
   sb.querySelectorAll('.stats-row').forEach(r=>r.addEventListener('click',()=>q('si-'+r.dataset.sk).classList.toggle('open')));
 }
 
